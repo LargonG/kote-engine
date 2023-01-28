@@ -21,5 +21,7 @@ abstract class System(private val group: Group) {
     open fun update(entity: Entity) {}
     open fun destroy(entity: Entity) {}
 
+    open fun pause() {}
+
     open fun stop() {}
 }

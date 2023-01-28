@@ -16,6 +16,10 @@ open class World {
         systems.forEach{ it.run() }
     }
 
+    fun pause() {
+        systems.forEach{ it.pause() }
+    }
+
     fun stop() {
         entities.forEach { Entities.destroyEntity(it) }
         entities.clear()
