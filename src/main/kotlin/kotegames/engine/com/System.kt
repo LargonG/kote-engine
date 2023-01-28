@@ -1,6 +1,6 @@
 package kotegames.engine.com
 
-abstract class System(internal val group: Group) {
+abstract class System(private val group: Group) {
 
     init {
         group.onCreateEvent += { init(it) }

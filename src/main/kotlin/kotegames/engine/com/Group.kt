@@ -36,11 +36,9 @@ class Group private constructor() {
         return res1 && res2 && res3
     }
 
-
     fun iterator(): Iterator<Entity> = entities.iterator()
 
     private fun onCreate(entity: Entity) {
-        println("create")
         if (filter(entity)) {
             entities.add(entity)
             onCreateEvent(entity)
@@ -48,7 +46,6 @@ class Group private constructor() {
     }
 
     private fun onDestroy(entity: Entity) {
-        println("destroy")
         if (filter(entity)) {
             onDestroyEvent(entity)
             entities.remove(entity)

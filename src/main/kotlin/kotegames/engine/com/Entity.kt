@@ -14,10 +14,12 @@ value class Entity(internal val id: Int = 0) {
 
     // Работает слишком долго, нужно что-то с этим делать
     inline fun <reified T: Component> getComponent(type: ComponentType) = components[type.id] as T
+
     fun setComponent(component: Component) {
         components[component.type.id] = component
         mutableTypes.add(component.type.id)
     }
+
     fun removeComponent(type: ComponentType): Component {
         val res = components[type.id] ?: throw NoSuchElementException("Component does not exist")
         components[type.id] = null
