@@ -1,26 +1,25 @@
 package kotegames.engine.com
 
-abstract class System {
-    /**
-     * Принимает в себя коллекцию из всех игровых объектов
-     */
+abstract class System(internal val group: Group) {
 
-    // Available components on entity that system uses
-    val components by lazy { initializeAnnotations() }
-
-    private fun initializeAnnotations(): Set<Int> =
-        this::class.annotations.filterIsInstance<UseComponents>().first().ids.toSet()
-
-    private fun filterEntity(entity: Entity): Boolean = entity.componentsEntry.containsAll(components)
-
-    fun run() {
-        update(EntityList.entities.filter { filterEntity(it.key) }.keys.toList())
+    init {
+        group.onCreateEvent += { init(it) }
+        group.onDestroyEvent += { init(it) }
     }
 
-    // Получает только объекты с нужными компонентами
-    protected abstract fun update(entities: List<Entity>)
-}
+    open fun start() {}
 
-@Target(AnnotationTarget.CLASS)
-@MustBeDocumented
-annotation class UseComponents(vararg val ids: Int)
+    open fun init(entity: Entity) {}
+
+    internal fun run() {
+        val iter = group.iterator()
+        while (iter.hasNext()) {
+            update(iter.next())
+        }
+    }
+
+    open fun update(entity: Entity) {}
+    open fun destroy(entity: Entity) {}
+
+    open fun stop() {}
+}

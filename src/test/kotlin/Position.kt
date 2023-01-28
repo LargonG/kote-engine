@@ -1,6 +1,8 @@
 import kotegames.engine.com.*
+import kotegames.engine.com.Group.Companion.all
 import org.junit.jupiter.api.Test
 import kotlin.math.sqrt
+import kotlin.test.assertEquals
 
 data class Vector2(val x: Float, val y: Float) {
     val magnitude by lazy { sqrt(x * x + y * y) }
@@ -10,39 +12,51 @@ data class Vector2(val x: Float, val y: Float) {
     operator fun times(k: Float) = Vector2(x * k, y * k)
 }
 
-const val POSITION = 0
-const val SPEED = 1
+val positionType = ComponentType()
+val speedType = ComponentType()
 
-@Component(POSITION)
-data class Position(val x: Float, val y: Float): IComponent() {
-    operator fun plus(vector: Vector2) = Position(x + vector.x, y + vector.y)
+@JvmInline
+value class Position(private val value: Vector2): Component {
+    operator fun plus(vector: Vector2) = Position(value + vector)
+
+    constructor(x: Float, y: Float) : this(Vector2(x, y))
+
+    override val type: ComponentType
+        get() = positionType
 }
 
-@Component(SPEED)
-data class Speed(val direction: Vector2, val amplitude: Float): IComponent()
+data class Speed(val direction: Vector2, val amplitude: Float): Component {
+    override val type: ComponentType
+        get() = speedType
+}
 
-@UseComponents(POSITION, SPEED)
-object MovementSystem: System() {
-    override fun update(entities: List<Entity>) {
-        entities.forEach { entity ->
-            val position = entity.components[POSITION] as Position
-            val speed = entity.components[SPEED] as Speed
-            val newPosition = position + speed.direction * speed.amplitude
-            entity.components[POSITION] = newPosition
-            println("$entity $newPosition")
-        }
+object MovementSystem: System(Group.nil().all(positionType, speedType)) {
+    override fun update(entity: Entity) {
+        val position = entity.getComponent<Position>(positionType)
+        val speed = entity.getComponent<Speed>(speedType)
+        val newPosition = position + speed.direction * speed.amplitude
+        entity.setComponent(newPosition);
+        println("$entity $newPosition")
     }
-
 }
 
 object Game {
     @Test
-    fun run() {
-        EntityList.createEntity(Position(10f, 0f))
-        EntityList.createEntity(Position(1f, 1f), Speed(Vector2(1f, 0f).normalize, 5f))
-        EntityList.createEntity(Position(0f, 0f), Speed(Vector2(0f, 1f).normalize, 2f))
+    fun simpleWorld() {
+        val world = World()
+        world.addSystem(MovementSystem)
+        val pos = Position(10f, 0f)
+        world.entity(pos)
+        world.entity(Position(1f, 1f), Speed(Vector2(1f, 0f).normalize, 5f))
+        world.entity(Position(0f, 0f), Speed(Vector2(0f, 1f).normalize, 2f))
+
+        world.start()
         repeat(5) {
-            MovementSystem.run()
+            world.update()
         }
+
+        val entities = world.getEntities().toList()
+        assertEquals(entities[0].components[positionType.id], pos)
+        world.stop()
     }
 }
