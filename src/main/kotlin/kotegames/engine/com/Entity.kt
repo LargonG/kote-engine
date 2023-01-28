@@ -1,7 +1,5 @@
 package kotegames.engine.com
 
-import java.util.BitSet
-
 @JvmInline
 value class Entity(internal val id: Int = 0) {
     val components: Array<Component?>
@@ -40,6 +38,7 @@ internal object Entities {
     val onCreate = Event<Entity>()
     val onDestroy = Event<Entity>()
 
+    @Synchronized
     private fun pullEntity(components: Array<out Component>): Entity {
         val entity = if (dead.isNotEmpty()) dead.removeLast() else Entity(nextId++)
         alive.add(arrayOfNulls(ComponentType.count))
@@ -48,6 +47,7 @@ internal object Entities {
         return entity
     }
 
+    @Synchronized
     private fun pushEntity(entity: Entity) {
         alive[entity.id] = null
         aliveTypes[entity.id].clear()
