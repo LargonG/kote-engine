@@ -25,10 +25,6 @@ class Group private constructor() {
         }
     }
 
-
-    val onCreateEvent = Event<Entity>()
-    val onDestroyEvent = Event<Entity>()
-
     private fun filter(entity: Entity): Boolean {
         val res1 = allTypes.isEmpty() || entity.types.containsAll(allTypes)
         val res2 = anyTypes.isEmpty() || entity.types.any {it in anyTypes}
@@ -37,6 +33,14 @@ class Group private constructor() {
     }
 
     fun iterator(): Iterator<Entity> = entities.iterator()
+
+    val onCreateEvent = Event<Entity>()
+    val onDestroyEvent = Event<Entity>()
+
+    init {
+        Entities.onCreate += { onCreate(it) }
+        Entities.onDestroy += { onDestroy(it) }
+    }
 
     private fun onCreate(entity: Entity) {
         if (filter(entity)) {
@@ -50,10 +54,5 @@ class Group private constructor() {
             onDestroyEvent(entity)
             entities.remove(entity)
         }
-    }
-
-    init {
-        Entities.onCreate += { onCreate(it) }
-        Entities.onDestroy += { onDestroy(it) }
     }
 }

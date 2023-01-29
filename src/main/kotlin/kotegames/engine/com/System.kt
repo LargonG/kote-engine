@@ -4,18 +4,17 @@ abstract class System(private val group: Group) {
 
     init {
         group.onCreateEvent += { init(it) }
-        group.onDestroyEvent += { init(it) }
+        group.onDestroyEvent += { destroy(it) }
     }
 
     open fun start() {}
 
+    open fun resume() {}
+
     open fun init(entity: Entity) {}
 
     internal fun run() {
-        val iter = group.iterator()
-        while (iter.hasNext()) {
-            update(iter.next())
-        }
+        group.iterator().forEach { update(it) }
     }
 
     open fun update(entity: Entity) {}

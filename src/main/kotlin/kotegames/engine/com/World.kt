@@ -12,6 +12,10 @@ open class World {
         systems.forEach{ it.start() }
     }
 
+    fun resume() {
+        systems.forEach{ it.resume() }
+    }
+
     fun update() {
         systems.forEach{ it.run() }
     }
